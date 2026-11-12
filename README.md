@@ -62,9 +62,20 @@ cp .env.example .env
 
 ### Obtener API key y token
 
-1. Entra en <https://trello.com/power-ups/admin> → **New** → crea un Power-Up (cualquier nombre) → **API key** → genera y copia la **API Key**.
-2. En esa misma página pulsa **Token** (o abre `https://trello.com/1/authorize?expiration=never&scope=read,write&response_type=token&name=mcp-trello&key=TU_API_KEY`) y autoriza. Copia el **token**.
-3. Pégalos en `.env`:
+Se usa el método clásico de Trello (API key + token). **No** hace falta OAuth 2.0 ni Power-Up.
+
+1. Entra en <https://trello.com/power-ups/admin> y pulsa **Nuevo** para crear una aplicación.
+2. En el formulario elige **«Mi aplicación no usa funciones de Power-Up»** (no se puede cambiar después). Pon un nombre (p. ej. `mcp-trello`), tu espacio de trabajo, tu correo y tu nombre como autor. Si no usas Power-Up, no pide URL de iframe.
+3. Dentro de la aplicación, abre la pestaña **Clave de API** (*Autenticación Trello*). Pulsa **«Genera una nueva clave de la API de autenticación de Trello para esta aplicación»**. **Ignora el botón «Configurar OAuth 2.0»**: no lo necesitas.
+4. Copia la **API Key** (cadena corta de ~32 caracteres). El «Secreto» no se usa.
+5. Genera el token abriendo esta URL en el navegador, **sustituyendo `TU_API_KEY` por tu clave real** (si la dejas tal cual, Trello responde «App not found»):
+
+   ```
+   https://trello.com/1/authorize?expiration=never&scope=read,write&response_type=token&name=mcp-trello&key=TU_API_KEY
+   ```
+
+   Pulsa **Permitir** y copia el token que aparece. Con `expiration=never` no caduca; usa `30days` si prefieres que caduque.
+6. Pega ambos valores en `.env`:
 
 ```
 TRELLO_API_KEY=...
@@ -106,6 +117,7 @@ Reinicia Claude Desktop. Verifica preguntando: **«lista mis tableros»**.
 - **El servidor no arranca / "spawn php ENOENT"**: `php` no está en el `PATH` de la aplicación. Pon la ruta completa en `command` (`which php`).
 - **No encuentra el archivo**: usa siempre rutas absolutas, nunca `~` ni rutas relativas.
 - **`vendor/autoload.php` no existe**: falta ejecutar `composer install`.
+- **«App not found» al autorizar**: dejaste `TU_API_KEY` en la URL; pon tu API key real.
 - **401**: key o token incorrectos/expirados. **403**: el token no tiene permiso de escritura (regenéralo con `scope=read,write`). **404**: ID inexistente o sin acceso. **429**: límite de Trello; el cliente reintenta solo hasta 3 veces.
 - Los mensajes de error del servidor salen por stderr y como resultado de la herramienta; stdout queda reservado al protocolo MCP.
 
